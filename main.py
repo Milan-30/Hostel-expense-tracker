@@ -1,5 +1,6 @@
 from database import get_connection
 from datetime import datetime
+from analysis import show_graphs
 def get_amount():
     while True:
         try:
@@ -206,7 +207,8 @@ def main():
         print("6. Total Expense")
         print("7. Category-wise Summary")
         print("8. Monthly Summary")
-        print("9. Exit")
+        print("9. View Graphs")
+        print("10. Exit")
         ch= int(input("Enter your choice: "))
         print()
         if ch==1:
@@ -226,12 +228,16 @@ def main():
         elif ch==8:
             monthly_expense()
         elif ch==9:
+            show_graphs()
+        elif ch==10:
             print("Exiting...")
             break
         else:
             print("Invalid choice")
+
 if __name__=="__main__":
     main()
+
 
 
     
