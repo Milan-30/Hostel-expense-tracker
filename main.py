@@ -1,6 +1,7 @@
 from database import get_connection
 from datetime import datetime
 from analysis import show_graphs
+import calendar
 def get_amount():
     while True:
         try:
@@ -79,11 +80,11 @@ def search_expense():
         q="Select * from expenses where id=%s"
         val=(e_id,)
     elif ch==2:
-        c=input("Enter the category to be searched:")
+        c=get_non_empty_input("Enter category to be searched: ")
         q="Select * from expenses where category=%s"
         val=(c,)
     elif ch==3:
-        date=input("Enter the date to be searched(YYYY-MM-DD):")
+        date=get_date()
         q="Select * from expenses where date=%s"
         val=(date,)
     else:
@@ -195,6 +196,40 @@ def monthly_expense():
         print(month.ljust(15),row[2])
     cur.close()
     con.close()
+def expense_insights():
+    con=get_connection()
+    cur=con.cursor()
+    cur.execute("select sum(amount) from expenses")
+    total=cur.fetchone()[0]
+    cur.execute("select avg(amount) from expenses")
+    avg=cur.fetchone()[0]
+    cur.execute("select category,amount,description from expenses order by amount desc limit 1")
+    highest=cur.fetchone()
+    cur.execute("select count(*) from expenses")
+    count=cur.fetchone()[0]
+    cur.execute("select category,sum(amount) as total from expenses group by category order by total desc limit 1")
+    highest_category=cur.fetchone()
+    cur.execute("select month(date),sum(amount) as total from expenses group by month(date) order by total desc limit 1")
+    highest_month=cur.fetchone()
+    print("\n         EXPENSE INSIGHTS ")
+    print(f"Total Expense       : ₹{total:.2f}")
+    print(f"Average Expense     : ₹{avg:.2f}")
+    print("Number of Expenses  : ",count)
+
+    print("\nHighest Expense:")
+    print("Category            : ",highest[0])
+    print(f"Amount              : ₹{highest[1]:.2f}")
+    print("Description         : ",highest[2])
+
+    print("\nHighest Spending Category:")
+    print(f"{highest_category[0]} : ₹{highest_category[1]:.2f}")
+
+    print("\nHighest Spending Month:")
+    month_name=calendar.month_name[highest_month[0]]
+    print(f"{month_name} : ₹{highest_month[1]:.2f}")
+    con.close()
+
+
 def main():
     while True:
         print()
@@ -208,7 +243,8 @@ def main():
         print("7. Category-wise Summary")
         print("8. Monthly Summary")
         print("9. View Graphs")
-        print("10. Exit")
+        print("10. Expense Insights")
+        print("11. Exit")
         ch= int(input("Enter your choice: "))
         print()
         if ch==1:
@@ -230,6 +266,8 @@ def main():
         elif ch==9:
             show_graphs()
         elif ch==10:
+            expense_insights()
+        elif ch==11:
             print("Exiting...")
             break
         else:
